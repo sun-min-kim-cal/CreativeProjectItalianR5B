@@ -20,9 +20,8 @@ def getAI():
     additional = request.json.get("input_additional")
     
     prompt = f"Generate {numQuestions} discussion questions on {bookTitle} related to {theme}. Here are some additional notes: {additional}. The more open ended the question, the better. Provide just the questions and no other text separating the text with only a '|'."
-    
     print(f"Prompt: {prompt}")
-    
+
     response = parseResponse(model.generate_content(prompt).text)
     print(f"Response: {response}")
 
