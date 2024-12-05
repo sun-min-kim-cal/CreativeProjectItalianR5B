@@ -1,17 +1,30 @@
 import './App.css';
 import { useState } from 'react';
 import axios from 'axios';
-
+import 'leaflet/dist/leaflet.css';
+import MapComponent from './MapComponent';
+import MapComponent1 from './MapComponent1';
+import MapComponent2 from './MapComponent2';
+import MapComponent3 from './MapComponent3';
+import MapComponent4 from './MapComponent4';
+import MapComponent5 from './MapComponent5';
 
 function App() {
-
   // Variables for query to Gemini
   const [bookTitle, setBook] = useState("");
   const [numQuestions, setNum] = useState(3);
-  const [additional, setAdditional] = useState("")
-  const [theme, setTheme] = useState("")
+  const [additional, setAdditional] = useState("");
+  const [theme, setTheme] = useState("");
   const [discussionQuestions, setQuestions] = useState([]);
-  
+  const worksID = {
+    "Clash of Civilization Over an Elevator in Piazza Vittorio by Amara Lakhous" : 1,
+    "In Other words by Jhumpa Lahiri" : 2,
+    "Orchestra of Piazza Vittorio by Agostino Ferrente" : 3,
+    "The Dance of the Oryx by Ubah Cristina Ali Farah" : 4,
+    "The Bonfire of Berlin by Helga Schneider" : 5
+  };
+  const [id, setID] = useState(0);
+
   // Sends bookTitle, numQuestions, and additional variables to backend and receives array of questions
   function Send() {
     console.log(bookTitle, numQuestions, additional);
@@ -22,12 +35,13 @@ function App() {
       input_additional: additional,
     })
     .then(function(response) {
-      console.log(response)
+      console.log(response);
       setQuestions(response.data['message']);
+      setID(worksID[bookTitle])
     })
     .catch(function(error) {
       console.log(error);
-    })
+    });
   }
 
   // Handles changes in bookTitle, numQuestions, and additional variables
@@ -44,23 +58,49 @@ function App() {
     setTheme(event.target.value);
   }
 
-  // Page is all situated inside Main
-    // Main contains Query and Questions
-      // Query is divided into header, Input, button to send, and another header for gift
-      // Questions contains newly generated questions
+  // 
+  const renderDiscussion = () => {
+    if (discussionQuestions.length > 0) {
+      return discussionQuestions.map((question, index) => (
+        <div key={index} style={{ margin: '10px', padding: '10px', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
+          {question}
+        </div>
+      ))
+    } else {
+      return 
+    }
+  }
+
+  const renderMap = () => {
+    if (id !== 0) {
+      if (id === 1) {
+        return <MapComponent1/>
+      } else if (id === 2) {
+        return <MapComponent2/>
+      } else if (id === 3) {
+        return <MapComponent3/>
+      } else if (id === 4) {
+        return <MapComponent4/>
+      } else if (id === 5) {
+        return <MapComponent5/>
+      }
+      return <MapComponent/>
+    } else {
+      return <div></div>
+    }
+  }
+
   return (
     <div className="App">
       <div className="Main">
         <div className="Query">
           <h2>Welcome to the discussion question generator for Italian R5B!</h2>
-          <h3>Enter the information below &#40;or leave empty&#41; to generate an discussion question!</h3>
+          <h3>Enter the information below (or leave empty) to generate a discussion question!</h3>
           <div className="Input">
             <div className="Book-Title">
-              <p1>Work Title:</p1>
+              <p>Work Title:</p>
               <select value={bookTitle} onChange={handleBookTitle}>
-                <option value="" disabled>
-                  Select a work
-                </option>
+                <option value="" disabled>Select a work</option>
                 <option value="Clash of Civilization Over an Elevator in Piazza Vittorio by Amara Lakhous">Clash of Civilization Over an Elevator in Piazza Vittorio by Amara Lakhous</option>
                 <option value="In Other words by Jhumpa Lahiri">In Other words by Jhumpa Lahiri</option>
                 <option value="Orchestra of Piazza Vittorio by Agostino Ferrente">Orchestra of Piazza Vittorio by Agostino Ferrente</option>
@@ -69,57 +109,38 @@ function App() {
               </select>
             </div>
             <div className="Theme">
-              <p1>Theme:</p1>
-              <textarea
-                cols = {1}
-                rows = {2}
-                value = {theme}
-                onChange = {handleTheme}
-              ></textarea>
+              <p>Theme:</p>
+              <textarea cols={1} rows={2} value={theme} onChange={handleTheme}></textarea>
             </div>
             <div className="Number-of-questions">
-              <p1>Number of Questions:</p1>
+              <p>Number of Questions:</p>
               <div>
-                <input
-                  type="range"
-                  id="slider"
-                  min="0"
-                  max="6"
-                  value={numQuestions}
-                  onChange={handleNumQuestions}
-                />
-              <p>{numQuestions}</p>
+                <input type="range" id="slider" min="0" max="6" value={numQuestions} onChange={handleNumQuestions} />
+                <p>{numQuestions}</p>
               </div>
             </div>
             <div className="Additional">
-              <p1>Additional Notes:</p1>
-              <textarea
-                cols = {20}
-                rows = {4}
-                value = {additional}
-                onChange = {handleAdditional}
-              ></textarea>
+              <p>Additional Notes:</p>
+              <textarea cols={20} rows={4} value={additional} onChange={handleAdditional}></textarea>
             </div>
           </div>
-          <button
-            onClick = {Send}
-          >Think of some questions!!</button>
+          <button onClick={Send}>Think of some questions!!</button>
         </div>
-        <div className="Discussion-Questions">
-            <h3>Discussion Questions: </h3>
-            {discussionQuestions.length > 0 ? (
-              discussionQuestions.map((question, index) => (
-                <div 
-                  key={index} 
-                  style={{ margin: '10px', padding: '10px', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}
-                >
-                  {question}
+        <div className="Output">
+          <h3>Discussion Questions: </h3>
+            { discussionQuestions.length > 0 ? (
+              <div className="Query-Output">
+                <div className="Map">
+                  {renderMap()}
                 </div>
-              ))
+                <div className="Discussion-Questions">
+                  {renderDiscussion()}
+                </div>
+              </div>
             ) : (
-              <div>Lets get discussing!!</div>
+              <div>Let's get discussing!!</div>
             )}
-          </div>
+        </div>
       </div>
     </div>
   );

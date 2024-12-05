@@ -4,7 +4,7 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app)
-genai.configure(api_key="")
+genai.configure(api_key="AIzaSyDMUrPfBTRZUnjiVz_Glt8rhcToVpYiyas")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Recieves query information from frontend
